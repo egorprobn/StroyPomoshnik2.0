@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827"><title>СтройПомощник 2.0</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#18212b;--muted:#6b7682;--accent:#f59e0b;--dark:#111827;--line:#e5e9ee;--green:#16a34a;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:linear-gradient(135deg,#111827,#263241);color:#fff;padding:22px 16px 74px}.wrap{max-width:1100px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;font-size:21px}.brand b{color:var(--accent)}.ver{font-size:12px;color:#cbd5df;border:1px solid #ffffff2b;padding:7px 10px;border-radius:20px}
+.hero{margin-top:32px}.hero h1{font-size:clamp(34px,7vw,58px);line-height:1;margin:0 0 12px;letter-spacing:-2px}.hero p{margin:0;color:#cbd5df;max-width:650px;line-height:1.5}
+main{margin-top:-42px;padding:0 16px 50px}.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;background:#fff;border:1px solid var(--line);padding:8px;border-radius:16px;margin-bottom:16px;box-shadow:0 10px 25px #0000000b}.nav button{margin:0;background:transparent;color:#394552;padding:11px 6px}.nav button.active{background:var(--dark);color:#fff}
+.page{display:none}.page.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:19px;box-shadow:0 8px 25px #00000008}.wide{grid-column:1/-1}.card h2{margin:0 0 5px;font-size:20px}.desc{font-size:13px;color:var(--muted);margin-bottom:15px}
+label{font-size:12px;font-weight:800;display:block;margin:10px 0 5px;color:#4a5561}input,select,textarea{width:100%;padding:12px;border:1px solid #d7dde3;border-radius:10px;background:#fff;font:inherit}textarea{min-height:120px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{border:0;border-radius:10px;padding:12px 15px;background:var(--dark);color:#fff;font-weight:800;cursor:pointer;margin-top:12px}.primary{background:var(--accent);color:#201606}.ghost{background:#eef1f4;color:#27313c}.danger{background:#fee2e2;color:#991b1b}.result{margin-top:13px;padding:13px;background:#f8fafb;border-radius:11px;font-weight:850}.result small{display:block;color:var(--muted);font-weight:500;margin-top:3px}.item{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.item button{margin:0;padding:6px 9px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{padding:15px;background:#f8fafb;border-radius:13px}.stat b{font-size:22px}.stat span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.check{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.check input{width:auto}.muted{color:var(--muted);font-size:13px}footer{text-align:center;color:var(--muted);font-size:12px;padding:0 16px 35px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.nav{grid-template-columns:repeat(5,1fr);position:sticky;top:6px;z-index:5}.nav button{font-size:10px;padding:9px 2px}.nav button::first-letter{font-size:16px}.row,.stats{grid-template-columns:1fr}.hero h1{font-size:40px}.ver{display:none}}
+.hint{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.35}</style></head>
+<body>
+<header><div class="wrap"><div class="top"><div class="brand">СТРОЙ<b>ПОМОЩНИК</b></div><div class="ver">2.0 · офлайн</div></div><div class="hero"><h1>Всё для стройки — в одном месте.</h1><p>Расчёты, материалы, сметы, задачи и заметки. Сделано для телефона и работы прямо на объекте.</p></div></div></header>
+<main><div class="wrap">
+<nav class="nav">
+<button class="active" onclick="show('home',this)">🏠 Объект</button><button onclick="show('calc',this)">🧮 Расчёты</button><button onclick="show('estimate',this)">🧾 Смета</button><button onclick="show('tasks',this)">📋 Работы</button><button onclick="show('notes',this)">📝 Заметки</button>
+</nav>
+
+<section id="home" class="page active"><div class="grid">
+<div class="card wide"><h2>🏠 Мой объект</h2><div class="desc">Сохраняется автоматически на этом телефоне.</div>
+<label>Название объекта</label><input id="project" placeholder="Например: Дом №1">
+<div class="stats"><div class="stat"><b id="doneStat">0%</b><span>готовность</span></div><div class="stat"><b id="costStat">0 ₽</b><span>смета</span></div><div class="stat"><b id="taskStat">0/0</b><span>задачи</span></div></div></div>
+<div class="card"><h2>📦 Материалы</h2><div class="desc">Блоки, кирпич, плитка, штукатурка и краска.</div>
+<select id="matType" onchange="materialFields()">
+<option value="blocks">Газоблок / пеноблок</option><option value="brick">Кирпич</option><option value="tile">Плитка</option><option value="plaster">Штукатурка</option><option value="paint">Краска</option>
+</select>
+<div id="materialFields"></div>
+<button class="primary" onclick="materials()">Рассчитать</button><div class="result" id="matR">Введите размеры</div></div>
+
+</div></section>
+
+<section id="calc" class="page"><div class="grid">
+<div class="card"><h2>📐 Площадь</h2><div class="desc">Пол, стена или потолок.</div><div class="row"><div><label>Длина, м</label><input id="al" type="number" value="5"></div><div><label>Ширина, м</label><input id="aw" type="number" value="3"></div></div><button class="primary" onclick="calcArea()">Рассчитать</button><div class="result" id="ar">15 м²</div></div>
+<div class="card wide"><h2>🧱 Расчёт материалов</h2><div class="desc">Блоки, кирпич, плитка, штукатурка и краска — с учётом запаса.</div>
+<div class="row">
+<div><label>Материал</label><select id="mcType" onchange="updateMaterialForm()">
+<option value="block">Газоблок / блок</option><option value="brick">Кирпич</option><option value="tile">Плитка</option><option value="plaster">Штукатурка</option><option value="paint">Краска</option>
+</select></div>
+<div><label>Площадь стены / поверхности, м²</label><input id="mcArea" type="number" value="50" min="0" step=".1"></div>
+</div>
+<div class="row">
+<div><label id="mcSize1Label">Длина блока, см</label><input id="mcSize1" type="number" value="60" min="0" step=".1"></div>
+<div><label id="mcSize2Label">Высота блока, см</label><input id="mcSize2" type="number" value="20" min="0" step=".1"></div>
+</div>
+<div class="row">
+<div><label>Запас, %</label><input id="mcWaste" type="number" value="10" min="0"></div>
+<div><label id="mcExtraLabel">Толщина штукатурки, мм</label><input id="mcExtra" type="number" value="10" min="0" step=".5"></div>
+</div>
+<button class="primary" onclick="calcMaterial()">Рассчитать</button><div class="result" id="mcResult">—</div></div>
+<div class="card"><h2>🧱 Объём</h2><div class="desc">Бетон, грунт, стяжка.</div><div class="row"><div><label>Длина, м</label><input id="vl" type="number" value="6"></div><div><label>Ширина, м</label><input id="vw" type="number" value="4"></div></div><label>Толщина, м</label><input id="vh" type="number" value=".15" step=".01"><button class="primary" onclick="calcVol()">Рассчитать</button><div class="result" id="vr">3,6 м³</div></div>
+<div class="card"><h2>🪣 Бетон с запасом</h2><label>Объём, м³</label><input id="bv" type="number" value="3.6" step=".1"><label>Запас, %</label><input id="bp" type="number" value="10"><button class="primary" onclick="calcBet()">Рассчитать</button><div class="result" id="br">3,96 м³</div></div>
+<div class="card"><h2>🔄 Конвертер</h2><label>Значение</label><input id="cv" type="number" value="1000"><select id="cu"><option value="mm">мм → м</option><option value="cm">см → м</option><option value="m">м → см</option><option value="kg">кг → г</option><option value="g">г → кг</option></select><button onclick="convert()">Перевести</button><div class="result" id="conv">1 м</div></div>
+</div></section>
+
+<section id="estimate" class="page"><div class="grid"><div class="card wide"><h2>🧾 Смета объекта</h2><div class="desc">Добавляйте материалы, инструмент или работу.</div><div class="row"><div><label>Наименование</label><input id="en" placeholder="Цемент"></div><div><label>Количество</label><input id="eq" type="number" value="1" step=".01"></div></div><div class="row"><div><label>Цена за единицу</label><input id="ep" type="number" placeholder="500"></div><div><label>Категория</label><select id="ec"><option>Материал</option><option>Работа</option><option>Инструмент</option><option>Другое</option></select></div></div><button class="primary" onclick="addEstimate()">+ Добавить</button><div id="estimateList"></div><div class="result">ИТОГО: <span id="estimateTotal">0</span></div><button class="danger" onclick="clearEstimate()">Очистить смету</button></div></div></section>
+
+<section id="tasks" class="page"><div class="grid"><div class="card wide"><h2>📋 План работ</h2><div class="desc">Отмечайте выполненные этапы.</div><div class="row"><input id="tn" placeholder="Добавить работу"><button onclick="addTask()">+ Добавить</button></div><div id="taskList"></div></div></div></section>
+
+<section id="notes" class="page"><div class="grid"><div class="card wide"><h2>📝 Заметки объекта</h2><div class="desc">Размеры, договорённости, список покупок — всё сохраняется в браузере.</div><textarea id="notes" placeholder="Например: завтра заказать 20 мешков цемента..."></textarea><button class="primary" onclick="saveNotes()">Сохранить</button><button class="ghost" onclick="notes.value='';saveNotes()">Очистить</button><div id="noteSaved" class="muted"></div></div></div></section>
+</div></main><footer>СтройПомощник 2.0 · данные хранятся локально в браузере</footer>
+
+<script>
+const $=id=>document.getElementById(id), fmt=n=>Number(n).toLocaleString('ru-RU',{maximumFractionDigits:2});
+function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
+function calcArea(){$('ar').textContent=fmt((+$('al').value)*(+$('aw').value))+' м²'}
+function calcVol(){$('vr').textContent=fmt((+$('vl').value)*(+$('vw').value)*(+$('vh').value))+' м³'}
+function calcBet(){$('br').textContent=fmt((+$('bv').value)*(1+(+$('bp').value)/100))+' м³'}
+function convert(){let v=+$('cv').value,u=$('cu').value,r=u==='mm'?v/1000:u==='cm'?v/100:u==='m'?v*100:u==='kg'?v*1000:v/1000;let unit=u==='m'||u==='g'?'см':u==='kg'?'г':'м';$('conv').textContent=fmt(r)+' '+unit}
+function updateMaterialForm(){
+let t=$('mcType').value;
+let a=$('mcSize1Label'),b=$('mcSize2Label'),e=$('mcExtraLabel');
+if(t==='block'){a.textContent='Длина блока, см';b.textContent='Высота блока, см';e.textContent='Не используется';$('mcSize1').value=60;$('mcSize2').value=20;$('mcExtra').value=0}
+if(t==='brick'){a.textContent='Длина кирпича, см';b.textContent='Высота кирпича, см';e.textContent='Не используется';$('mcSize1').value=25;$('mcSize2').value=6.5;$('mcExtra').value=0}
+if(t==='tile'){a.textContent='Длина плитки, см';b.textContent='Ширина плитки, см';e.textContent='Не используется';$('mcSize1').value=60;$('mcSize2').value=60;$('mcExtra').value=0}
+if(t==='plaster'){a.textContent='—';b.textContent='—';e.textContent='Толщина слоя, мм';$('mcSize1').value=0;$('mcSize2').value=0;$('mcExtra').value=10}
+if(t==='paint'){a.textContent='Расход, м²/л';b.textContent='Количество слоёв';e.textContent='Не используется';$('mcSize1').value=10;$('mcSize2').value=2;$('mcExtra').value=0}
+}
+function calcMaterial(){
+let t=$('mcType').value,a=+$('mcArea').value,w=1+(+$('mcWaste').value)/100,s1=+$('mcSize1').value,s2=+$('mcSize2').value,e=+$('mcExtra').value,n=0,unit='',note='';
+if(t==='block'){n=a/((s1/100)*(s2/100))*w;unit='шт.';note='блоков'}
+if(t==='brick'){n=a/((s1/100)*(s2/100))*w;unit='шт.';note='кирпичей'}
+if(t==='tile'){n=a/((s1/100)*(s2/100))*w;unit='шт.';note='плиток'}
+if(t==='plaster'){n=a*(e/1000)*w;unit='м³';note='штукатурной смеси по объёму'}
+if(t==='paint'){n=(a/s1)*s2*w;unit='л';note='краски'}
+$('mcResult').innerHTML=fmt(n)+' '+unit+'<small>'+note+', включая '+fmt(+$('mcWaste').value)+'% запаса</small>';
+}
+function updateMaterialForm(){
+ let t=$('matType').value, x='';
+ if(t==='blocks') x='<label>Расход, блоков/м²</label><input id="matRate" type="number" value="12.5" min="0" step=".1">';
+ if(t==='brick') x='<label>Расход, кирпичей/м²</label><input id="matRate" type="number" value="52" min="0" step="1">';
+ if(t==='tile') x='<label>Площадь одной плитки, м²</label><input id="tileSize" type="number" value=".09" min=".0001" step=".01">';
+ if(t==='plaster') x='<label>Средняя толщина слоя, мм</label><input id="plasterThick" type="number" value="10" min="1" step="1">';
+ if(t==='paint') x='<label>Расход краски, л/м² (один слой)</label><input id="paintRate" type="number" value=".12" min=".01" step=".01"><label>Количество слоёв</label><input id="paintLayers" type="number" value="2" min="1" step="1">';
+ $('materialExtra').innerHTML=x;
+}
+function materialFields(){
+let t=$('matType').value;
+let common='<div class="row"><div><label>Длина стены, м</label><input id="mw1" type="number" value="5" min="0"></div><div><label>Высота, м</label><input id="mw2" type="number" value="3" min="0"></div></div>';
+if(t==='blocks') common+='<div class="row"><div><label>Длина блока, мм</label><input id="ms1" type="number" value="600"></div><div><label>Высота блока, мм</label><input id="ms2" type="number" value="250"></div></div><label>Запас, %</label><input id="mwaste" type="number" value="5"><div class="hint">Расчёт учитывает площадь лицевой стороны блока.</div>';
+if(t==='brick') common+='<div class="row"><div><label>Длина кирпича, мм</label><input id="ms1" type="number" value="250"></div><div><label>Высота кирпича, мм</label><input id="ms2" type="number" value="65"></div></div><label>Запас, %</label><input id="mwaste" type="number" value="7"><div class="hint">Без учёта проёмов и толщины шва.</div>';
+if(t==='tile') common='<label>Площадь поверхности, м²</label><input id="mw1" type="number" value="20" min="0"><div class="row"><div><label>Длина плитки, мм</label><input id="ms1" type="number" value="600"></div><div><label>Ширина плитки, мм</label><input id="ms2" type="number" value="600"></div></div><label>Запас, %</label><input id="mwaste" type="number" value="10">';
+if(t==='plaster') common='<label>Площадь стены, м²</label><input id="mw1" type="number" value="50" min="0"><label>Толщина слоя, мм</label><input id="ms1" type="number" value="10" min="0"><label>Расход смеси, кг/м² на 1 мм</label><input id="cons" type="number" value="1.5" step=".1"><label>Запас, %</label><input id="mwaste" type="number" value="10"><div class="hint">Расход можно заменить на значение с упаковки вашей смеси.</div>';
+if(t==='paint') common='<label>Площадь окраски, м²</label><input id="mw1" type="number" value="50" min="0"><label>Расход, м²/л</label><input id="cons" type="number" value="10" step=".5"><label>Количество слоёв</label><input id="layers" type="number" value="2" min="1"><label>Запас, %</label><input id="mwaste" type="number" value="10">';
+$('materialFields').innerHTML=common;
+}
+function materials(){
+let t=$('matType').value,a=+$('mw1').value,w=1+(+$('mwaste').value||0)/100;
+if(t==='blocks'||t==='brick'){
+let face=(+$('ms1').value/1000)*(+$('ms2').value/1000), count=a*face? (a/face)*w:0;
+$('matR').innerHTML=fmt(count)+' шт.<small>ориентировочное количество, с запасом</small>';
+}else if(t==='tile'){
+let one=(+$('ms1').value/1000)*(+$('ms2').value/1000), count=one?(a/one)*w:0;
+$('matR').innerHTML=fmt(count)+' шт.<small>плитки, с запасом</small><div class="hint">Покупать лучше целыми коробками.</div>';
+}else if(t==='plaster'){
+let kg=a*(+$('ms1').value)*(+$('cons').value)*w;
+$('matR').innerHTML=fmt(kg)+' кг<small>сухой смеси, с запасом</small><div class="hint">Количество мешков = кг ÷ вес одного мешка.</div>';
+}else{
+let liters=(a*(+$('layers').value)/(+$('cons').value))*w;
+$('matR').innerHTML=fmt(liters)+' л<small>краски, с запасом</small>';
+}}
+
+let estimates=JSON.parse(localStorage.getItem('estimates')||'[]'),tasks=JSON.parse(localStorage.getItem('tasks')||'[]');
+function addEstimate(){let n=$('en').value.trim(),q=+$('eq').value,p=+$('ep').value;if(!n||q<0||p<0)return;estimates.push({n,q,p,c:$('ec').value});save();renderEstimate();$('en').value='';$('eq').value=1;$('ep').value=''}
+function renderEstimate(){let total=estimates.reduce((s,x)=>s+x.q*x.p,0);$('estimateTotal').textContent=fmt(total);$('costStat').textContent=fmt(total)+' '+($('currencySymbol').value||'');$('estimateList').innerHTML=estimates.map((x,i)=>`<div class="item"><span>${x.n}<small class="muted"> · ${x.c} · ${fmt(x.q)} × ${fmt(x.p)}</small></span><b>${fmt(x.q*x.p)} <button class="danger" onclick="delEstimate(${i})">×</button></b></div>`).join('');updateHome()}
+function delEstimate(i){estimates.splice(i,1);save();renderEstimate()}function clearEstimate(){estimates=[];save();renderEstimate()}
+function addTask(){let n=$('tn').value.trim();if(!n)return;tasks.push({n,done:false});save();renderTasks();$('tn').value=''}
+function toggleTask(i){tasks[i].done=!tasks[i].done;save();renderTasks()}
+function delTask(i){tasks.splice(i,1);save();renderTasks()}
+function renderTasks(){$('taskList').innerHTML=tasks.map((x,i)=>`<div class="check"><input type="checkbox" ${x.done?'checked':''} onchange="toggleTask(${i})"><span style="${x.done?'text-decoration:line-through;color:#889':' '}">${x.n}</span><button class="danger" onclick="delTask(${i})">×</button></div>`).join('');updateHome()}
+function updateHome(){let done=tasks.length?Math.round(tasks.filter(x=>x.done).length/tasks.length*100):0;$('doneStat').textContent=done+'%';$('taskStat').textContent=tasks.filter(x=>x.done).length+'/'+tasks.length}
+function save(){localStorage.setItem('estimates',JSON.stringify(estimates));localStorage.setItem('tasks',JSON.stringify(tasks));localStorage.setItem('project',$('project').value)}
+function saveNotes(){localStorage.setItem('notes',$('notes').value);$('noteSaved').textContent='Сохранено ✓';setTimeout(()=>$('noteSaved').textContent='',1500)}
+function saveCurrency(){save();$('curR').textContent='В смете будет: '+$('currencySymbol').value}
+$('project').value=localStorage.getItem('project')||'';$('project').oninput=save;$('notes').value=localStorage.getItem('notes')||'';$('currency').value=localStorage.getItem('currency')||'EGP';$('currencySymbol').value=localStorage.getItem('currencySymbol')||'ج.م';
+renderEstimate();renderTasks();updateMaterialForm();materials();calcArea();calcVol();calcBet();convert();
+</script></body></html>
